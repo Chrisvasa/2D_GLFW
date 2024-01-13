@@ -22,7 +22,7 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"   FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
 "}\n\0";
 
 int main()
@@ -40,7 +40,7 @@ int main()
 
     // glfw window creation
     // Creates the window, sets width, height, title etc..
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Snek", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "2D Game", NULL, NULL);
     if (window == NULL) {
         error_callback(404, "Window or OpenGL context creation failed!");
         glfwTerminate();
@@ -105,16 +105,29 @@ int main()
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
-    glUseProgram(shaderProgram);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     float vertices[] = {
-        //    X,     Y,    Z coordinates.
-            -0.5f, -0.5f, 0.0f,
-             0.5f, -0.5f, 0.0f,
-             0.0f,  0.5f, 0.0f
+    //    X,     Y,    Z coordinates.
+         0.0f,  0.25f,  0.0f,  // top
+       -0.15f, -0.25f,  0.0f,  // Bottom left
+         //0.0f, -0.15f,  0.0f,  // Bottom mid
+        0.15f, -0.25f,  0.0f,  // Bottom right
+
+        0.30f,  0.25f,  0.0f,  // top
+        0.15f, -0.25f,  0.0f,  // Bottom left
+        0.45f, -0.25f,  0.0f,  // Bottom right
+
+        0.15f,  0.75f,  0.0f,  // top
+        0.0f,   0.25f,   0.0f,  // Bottom left
+        0.30f,  0.25f,  0.0f  // Bottom right
+    };
+
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 3, 2 // second triangle
     };
 
     /*
@@ -131,9 +144,10 @@ int main()
     Once the data is in the graphics card's memory the vertex shader has almost instant access to the vertices
       making it extremely fast
     */
-    unsigned int VBO, VAO;
+    unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attribute(s).
     glBindVertexArray(VAO);
     /*
@@ -151,6 +165,9 @@ int main()
     // 0. copy our vertices array in a buffer for OpenGL to use
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    // copy our index array in a element buffer for OpenGL to use
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),indices, GL_STATIC_DRAW);
     // 1. then set the vertex attribute pointers
     /*
     The first parameter specifies which vertex attribute we want to configure.
@@ -189,11 +206,15 @@ int main()
     What if there was some way we could store all these state configurations into an object and simply bind this object to 
      restore its state? 
     */
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     // ..:: Drawing code (in render loop) ::..
+    // 
+    glBindVertexArray(0);
     // 4. draw the object
-    glUseProgram(shaderProgram);
+    /*glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 3);*/
+    //glBindVertexArray(0);
     // someOpenGLFunctionThatDrawsOurTriangle();
 
     /*
@@ -211,15 +232,19 @@ int main()
     */
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    // uncomment this call to draw in wireframe polygons.
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     // RENDER LOOP
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT); // Clears screen
+        //glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 9);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         /* Swap front and back buffers.
         Will swap the color buffer
@@ -238,7 +263,7 @@ int main()
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    //glDeleteBuffers(1, &EBO);
+    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();
