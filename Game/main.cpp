@@ -116,6 +116,16 @@ int main()
          //0.0f, -0.15f,  0.0f,  // Bottom mid
         0.15f, -0.25f,  0.0f,  // Bottom right
 
+        //0.30f,  0.25f,  0.0f,  // top
+        //0.15f, -0.25f,  0.0f,  // Bottom left
+        //0.45f, -0.25f,  0.0f,  // Bottom right
+
+        //0.15f,  0.75f,  0.0f,  // top
+        //0.0f,   0.25f,   0.0f,  // Bottom left
+        //0.30f,  0.25f,  0.0f  // Bottom right
+    };
+
+    float vertices2[] = {
         0.30f,  0.25f,  0.0f,  // top
         0.15f, -0.25f,  0.0f,  // Bottom left
         0.45f, -0.25f,  0.0f,  // Bottom right
@@ -144,7 +154,7 @@ int main()
     Once the data is in the graphics card's memory the vertex shader has almost instant access to the vertices
       making it extremely fast
     */
-    unsigned int VBO, VAO, EBO;
+    unsigned int VBO, VAO, EBO, VAO2, VBO2;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -165,9 +175,19 @@ int main()
     // 0. copy our vertices array in a buffer for OpenGL to use
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &VBO2);
+    glBindVertexArray(VAO2);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
     // copy our index array in a element buffer for OpenGL to use
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),indices, GL_STATIC_DRAW);
+    /*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),indices, GL_STATIC_DRAW);*/
     // 1. then set the vertex attribute pointers
     /*
     The first parameter specifies which vertex attribute we want to configure.
@@ -242,9 +262,14 @@ int main()
         //glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
 
         glUseProgram(shaderProgram);
+        // triangle 1
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 9);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        // triangle 2
+        glBindVertexArray(VAO2);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
         /* Swap front and back buffers.
         Will swap the color buffer
