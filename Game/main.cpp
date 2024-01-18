@@ -6,6 +6,8 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void error_callback(int error, const char* description);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void character_callback(GLFWwindow* window, unsigned int codepoint);
+
 
 const unsigned int SCR_WIDTH = 640;
 const unsigned int SCR_HEIGHT = 480;
@@ -64,6 +66,7 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSetErrorCallback(error_callback);
     glfwSetKeyCallback(window, key_callback);
+    glfwSetCharCallback(window, character_callback);
 
     // glad: load all OpenGL function pointers
     // We pass GLAD the function to load the address of the OpenGL function pointers which is OS-specific. 
@@ -381,6 +384,11 @@ void error_callback(int error, const char* description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
+void character_callback(GLFWwindow* window, unsigned int codepoint)
+{
+    std::cout << (char)codepoint;
+}
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -393,6 +401,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glClearColor(0.0, 0.0, 0.4f, 0.0);
     if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
         glClearColor(0.4f, 0.4f, 0.0, 0.0);
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+        std::cout << std::endl;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
