@@ -22,7 +22,7 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(0.5f, 0.64f, 0.3f, 1.0f);\n"
+"   FragColor = vec4(0.5f, 0.0f, 1.0f, 1.0f);\n"
 "}\n\0";
 
 const char* fragmentShaderSource2 = "#version 330 core\n"
@@ -30,6 +30,13 @@ const char* fragmentShaderSource2 = "#version 330 core\n"
 "void main()\n"
 "{\n"
 "   FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+"}\n\0";
+
+const char* fragmentShaderSource3 = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(0.69f, 0.42f, 0.0f, 1.0f);\n"
 "}\n\0";
 
 int main()
@@ -47,7 +54,7 @@ int main()
 
     // glfw window creation
     // Creates the window, sets width, height, title etc..
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "2D Game", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Very Pog UI design", NULL, NULL);
     if (window == NULL) {
         error_callback(404, "Window or OpenGL context creation failed!");
         glfwTerminate();
@@ -107,6 +114,16 @@ int main()
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
+    unsigned int fragmentShader3 = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader3, 1, &fragmentShaderSource3, NULL);
+    glCompileShader(fragmentShader3);
+    glGetShaderiv(fragmentShader3, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
     // link shaders
     /*
     The glCreateProgram function creates a program and returns the ID reference to the newly created program object. 
@@ -132,35 +149,51 @@ int main()
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
+    unsigned int shaderProgram3 = glCreateProgram();
+    glAttachShader(shaderProgram3, vertexShader);
+    glAttachShader(shaderProgram3, fragmentShader3);
+    glLinkProgram(shaderProgram3);
+    glGetProgramiv(shaderProgram3, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram3, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteShader(fragmentShader2);
+    glDeleteShader(fragmentShader3);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     float vertices[] = {
     //    X,     Y,    Z coordinates.
-         0.0f,  0.25f,  0.0f,  // top
-       -0.15f, -0.25f,  0.0f,  // Bottom left
-         //0.0f, -0.15f,  0.0f,  // Bottom mid
-        0.15f, -0.25f,  0.0f,  // Bottom right
+       -0.95f,  -0.90f,  0.0f,  // top left
+       -0.95f,  -0.25f,  0.0f,  // Bottom left
+        0.95f,  -0.25f,  0.0f,  // Bottom right
 
-        //0.30f,  0.25f,  0.0f,  // top
-        //0.15f, -0.25f,  0.0f,  // Bottom left
-        //0.45f, -0.25f,  0.0f,  // Bottom right
-
-        //0.15f,  0.75f,  0.0f,  // top
-        //0.0f,   0.25f,   0.0f,  // Bottom left
-        //0.30f,  0.25f,  0.0f  // Bottom right
+        0.95f,  -0.25f,  0.0f,  // top left
+        0.95f,  -0.90f,  0.0f,  // Bottom left
+       -0.95f,  -0.90f,  0.0f  // Bottom right
     };
 
     float vertices2[] = {
-        0.30f,  0.25f,  0.0f,  // top
-        0.15f, -0.25f,  0.0f,  // Bottom left
-        0.45f, -0.25f,  0.0f,  // Bottom right
+        -0.95f,   -0.20f,  0.0f,  // top left
+        -0.95f,    0.85f,  0.0f,  // Bottom left
+         0.95f,    0.85f,  0.0f,  // Bottom right
 
-        0.15f,  0.75f,  0.0f,  // top
-        0.0f,   0.25f,   0.0f,  // Bottom left
-        0.30f,  0.25f,  0.0f  // Bottom right
+        0.95f,    0.85f,  0.0f,  // top left
+        0.95f,   -0.20f,  0.0f,  // Bottom left
+       -0.95f,   -0.20f,  0.0f  // Bottom right
+    };
+
+    float vertices3[] = {
+       -0.90f,   -0.15f,  0.0f,  // top left
+       -0.90f,    0.80f,  0.0f,  // Bottom left
+       -0.35f,    0.80f,  0.0f,  // Bottom right
+
+       -0.35f,    0.80f,  0.0f,  // top left
+       -0.35f,   -0.15f,  0.0f,  // Bottom left
+       -0.90f,   -0.15f,  0.0f  // Bottom right
     };
 
     unsigned int indices[] = {
@@ -182,12 +215,12 @@ int main()
     Once the data is in the graphics card's memory the vertex shader has almost instant access to the vertices
       making it extremely fast
     */
-    unsigned int VBO, VAO, EBO, VAO2, VBO2;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    unsigned int VBO[3], VAO[3], EBO;
+    glGenVertexArrays(1, &VAO[0]);
+    glGenBuffers(1, &VBO[0]);
     glGenBuffers(1, &EBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attribute(s).
-    glBindVertexArray(VAO);
+    glBindVertexArray(VAO[0]);
     /*
     glBufferData is a function specifically targeted to copy user-defined data into the currently bound buffer.
     The first argument is the type of the buffer we want to copy data into: the vertex buffer object currently
@@ -201,18 +234,26 @@ int main()
         - GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
     */
     // 0. copy our vertices array in a buffer for OpenGL to use
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    glGenVertexArrays(1, &VAO2);
-    glGenBuffers(1, &VBO2);
-    glBindVertexArray(VAO2);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glGenVertexArrays(1, &VAO[1]);
+    glGenBuffers(1, &VBO[1]);
+    glBindVertexArray(VAO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glGenVertexArrays(1, &VAO[2]);
+    glGenBuffers(1, &VBO[2]);
+    glBindVertexArray(VAO[2]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices3), vertices3, GL_STATIC_DRAW);
     // copy our index array in a element buffer for OpenGL to use
     /*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),indices, GL_STATIC_DRAW);*/
@@ -291,14 +332,19 @@ int main()
 
         // triangle 1
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(VAO[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // triangle 2
         glUseProgram(shaderProgram2);
-        glBindVertexArray(VAO2);
+        glBindVertexArray(VAO[1]);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+
+        // triangle 3
+        glUseProgram(shaderProgram3);
+        glBindVertexArray(VAO[2]);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         /* Swap front and back buffers.
         Will swap the color buffer
@@ -315,10 +361,16 @@ int main()
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO[0]);
+    glDeleteVertexArrays(1, &VAO[1]);
+    glDeleteVertexArrays(1, &VAO[2]);
+    glDeleteBuffers(1, &VBO[0]);
+    glDeleteBuffers(1, &VBO[1]);
+    glDeleteBuffers(1, &VBO[2]);
     glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderProgram2);
+    glDeleteProgram(shaderProgram3);
 
     glfwTerminate();
     return 0;
