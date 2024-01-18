@@ -41,6 +41,13 @@ const char* fragmentShaderSource3 = "#version 330 core\n"
 "   FragColor = vec4(0.69f, 0.42f, 0.0f, 1.0f);\n"
 "}\n\0";
 
+const char* fragmentShaderSource4 = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);\n"
+"}\n\0";
+
 int main()
 {
     // glfw: initialize and configure
@@ -127,6 +134,16 @@ int main()
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
+    unsigned int fragmentShader4 = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader4, 1, &fragmentShaderSource4, NULL);
+    glCompileShader(fragmentShader4);
+    glGetShaderiv(fragmentShader4, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
     // link shaders
     /*
     The glCreateProgram function creates a program and returns the ID reference to the newly created program object. 
@@ -162,41 +179,61 @@ int main()
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
+    unsigned int shaderProgram4 = glCreateProgram();
+    glAttachShader(shaderProgram4, vertexShader);
+    glAttachShader(shaderProgram4, fragmentShader4);
+    glLinkProgram(shaderProgram4);
+    glGetProgramiv(shaderProgram4, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram3, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteShader(fragmentShader2);
     glDeleteShader(fragmentShader3);
+    glDeleteShader(fragmentShader4);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     float vertices[] = {
     //    X,     Y,    Z coordinates.
-       -0.95f,  -0.90f,  0.0f,  // top left
-       -0.95f,  -0.25f,  0.0f,  // Bottom left
-        0.95f,  -0.25f,  0.0f,  // Bottom right
+       -1.0f,  -0.90f,  0.0f,  // top left
+       -1.0f,  -0.25f,  0.0f,  // Bottom left
+        1.0f,  -0.25f,  0.0f,  // Bottom right
 
-        0.95f,  -0.25f,  0.0f,  // top left
-        0.95f,  -0.90f,  0.0f,  // Bottom left
-       -0.95f,  -0.90f,  0.0f  // Bottom right
+        1.0f,  -0.25f,  0.0f,  // top left
+        1.0f,  -0.90f,  0.0f,  // Bottom left
+       -1.0f,  -0.90f,  0.0f  // Bottom right
     };
 
     float vertices2[] = {
-        -0.95f,   -0.20f,  0.0f,  // top left
-        -0.95f,    0.85f,  0.0f,  // Bottom left
-         0.95f,    0.85f,  0.0f,  // Bottom right
+        -1.0f,   -0.20f,  0.0f,  // top left
+        -1.0f,    0.85f,  0.0f,  // Bottom left
+         1.0f,    0.85f,  0.0f,  // Bottom right
 
-        0.95f,    0.85f,  0.0f,  // top left
-        0.95f,   -0.20f,  0.0f,  // Bottom left
-       -0.95f,   -0.20f,  0.0f  // Bottom right
+        1.0f,    0.85f,  0.0f,  // top left
+        1.0f,   -0.20f,  0.0f,  // Bottom left
+       -1.0f,   -0.20f,  0.0f,  // Bottom right
+
+       //Second panel
+       -1.0f,   0.85f,  0.0f,  // top left
+       -1.0f,   1.0f,  0.0f,  // Bottom left
+        1.0f,   1.0f,  0.0f,  // Bottom right
+
+        1.0f,   1.0f,  0.0f,  // top left
+        1.0f,   0.85f,  0.0f,  // Bottom left
+       -1.0f,   0.85f,  0.0f  // Bottom right
     };
 
     float vertices3[] = {
-       -0.90f,   -0.15f,  0.0f,  // top left
-       -0.90f,    0.80f,  0.0f,  // Bottom left
+       -0.97f,   -0.15f,  0.0f,  // top left
+       -0.97f,    0.80f,  0.0f,  // Bottom left
        -0.35f,    0.80f,  0.0f,  // Bottom right
 
        -0.35f,    0.80f,  0.0f,  // top left
        -0.35f,   -0.15f,  0.0f,  // Bottom left
-       -0.90f,   -0.15f,  0.0f  // Bottom right
+       -0.97f,   -0.15f,  0.0f  // Bottom right
     };
 
     unsigned int indices[] = {
@@ -344,6 +381,11 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 6);
         //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
+        // Top panel
+        glUseProgram(shaderProgram4);
+        glBindVertexArray(VAO[1]);
+        glDrawArrays(GL_TRIANGLES, 6, 12);
+
         // triangle 3
         glUseProgram(shaderProgram3);
         glBindVertexArray(VAO[2]);
@@ -374,6 +416,7 @@ int main()
     glDeleteProgram(shaderProgram);
     glDeleteProgram(shaderProgram2);
     glDeleteProgram(shaderProgram3);
+    glDeleteProgram(shaderProgram4);
 
     glfwTerminate();
     return 0;
