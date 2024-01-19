@@ -3,4 +3,4 @@
 ## Current Progress
 Very basic shapes. Still lots to learn.
 
-![image](https://github.com/Chrisvasa/2D_GLFW/assets/29359169/fba34827-ef46-4fb1-8f3d-a43296ce2085)
+![image](https://github.com/Chrisvasa/2D_GLFW/assets/29359169/418eef02-61c1-454d-b258-30f8689412f4)
